@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+        <canvas id="canvas" style="width: 100%;height: 100%;"></canvas>
+        <script type="importmap">
+			{
+				"imports": {
+					//"three": "../build/three.module.js"
+					"three": "https://unpkg.com/three/build/three.module.js",
+                    "lil-gui": "https://unpkg.com/lil-gui@0.16.1/dist/lil-gui.esm.min.js"
+				}
+			}
+		</script>
+		<script type="module">
+            import GUI from 'lil-gui';
+            import * as THREE from 'three';
+            import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js';
+
+            const state = {
+                a: 1.0, // semi-major axis (units)
+                e: 0.1, // eccentricity (scalar)
+                i: 0.0, // inclination (radians)
+                O: 0.0, // RAAN (radians)
+                o: 0.0, // AoP (radians)
+                theta: 0.0, // True anomaly (radians)
+                planet: "earth",
+                angles: "degrees",
+                distances: "AU",
+                pos_x: 0.0,
+                pos_y: 0.0,
+                pos_z: 0.0,
+                vel_x: 0.0,
+                vel_y: 0.0,
+                vel_z: 0.0,
+                v: 0.0,
+                arg_x: 0.0,
+                arg_y: 0.0,
+            };
+            const gui = new GUI();
+            //const settings = gui.addFolder('Settings');
+            //settings.add(state, 'planet', ["earth", "sun", "moon", "jupiter", "saturn"]);
+            //settings.add(state, 'angles', ['radians', 'degrees', 'pi radians']);
+            //settings.add(state, 'distances', ['kilometers', 'AU', 'miles']);
+            //settings.close(); // settings are closed at first
+            const kepler = gui.addFolder('Keplerian elements');
+            kepler.add(state, 'a', 0.1).min(0).step(0.1).onChange(render);
+            kepler.add(state, 'e', 0, 1.5).onChange(render);
+            kepler.add(state, 'i', 0, 360).onChange(render);
+            kepler.add(state, 'O', 0, 360).onChange(render);
+            kepler.add(state, 'o', 0, 360).onChange(render);
+            //kepler.add(state, 'O', 0, 360).listen();
+            //kepler.add(state, 'o', 0, 360).listen();
+            //kepler.add(state, 'theta', 0, 360).listen();
+            //const position = gui.addFolder('Position (xyz)');
+            //position.add(state, 'pos_x').listen();
+            //position.add(state, 'pos_y').listen();
+            //position.add(state, 'pos_z').listen();
+            //const velocity_xyz = gui.addFolder('Velocity (xyz)');
+            //velocity_xyz.add(state, 'vel_x').listen();
+            //velocity_xyz.add(state, 'vel_y').listen();
+            //velocity_xyz.add(state, 'vel_z').listen();
+            //const velocity_polar = gui.addFolder('Velocity (polar)');
+            //velocity_polar.add(state, 'v').listen();
+            //velocity_polar.add(state, 'arg_x').listen();
+            //velocity_polar.add(state, 'arg_y').listen();
+            //gui.onChange(event => {render();});
+
+            const canvas = document.querySelector("#canvas");
+            const renderer = new THREE.WebGLRenderer({canvas});
+			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0, 0);
+            controls.update();
+
+            // scene
+			const scene = new THREE.Scene();
+
+			// planet
+			const sphereGeometry = new THREE.SphereGeometry(0.01);
+            const sphereMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+            const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(planet);
+
+            // orbital plane
+            const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
+            const orbitalPlaneMat = new THREE.MeshBasicMaterial({color: 0x339933, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
+            const orbitalPlane = new THREE.Mesh(orbitalPlaneGeo, orbitalPlaneMat);
+            orbitalPlane.overdraw = true;
+            scene.add(orbitalPlane);
+
+            // ellipse
+            const path = new THREE.Shape();
+            path.absellipse(0, 0, 4, 2, 0, 2*Math.PI, false, 0);
+            const geometry = new THREE.ShapeBufferGeometry(path, 30);
+            const material = new THREE.MeshBasicMaterial({color: 0x3f7b9d, side: THREE.DoubleSide});
+            const ellipse = new THREE.Mesh(geometry, material);
+			orbitalPlane.add( ellipse ); // important
+
+			// the invariable plane
+            const planeGeom = new THREE.PlaneGeometry(25, 25);
+            planeGeom.rotateX(-Math.PI * 0.5); // this is how you can do it
+            const planeMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
+            const plane = new THREE.Mesh(planeGeom, planeMat);
+            plane.overdraw = true;
+            scene.add(plane);
+
+
+
+			camera.position.z = 5;
+
+            function resizeRendererToDisplaySize(renderer) {
+                const canvas = renderer.domElement;
+                const pixelRatio = window.devicePixelRatio;
+                const width = canvas.clientWidth * pixelRatio | 0;
+                const height = canvas.clientHeight * pixelRatio | 0;
+
+                const needResize = canvas.width !== width || canvas.height !== height;
+
+                if (needResize) {
+                    renderer.setSize(width, height, false);
+                }
+
+                return needResize;
+            }
+
+            function setupEllipse() {
+                ellipse.position.x = state.a * state.e;
+            }
+
+			function render(time) {
+                //time /= 1000.0;
+
+                if (resizeRendererToDisplaySize(renderer)) {
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                }
+
+                const a = state.a;
+                const e = state.e;
+                const i = state.i * 2*Math.PI / 360.0;
+                const O = state.O * 2*Math.PI / 360.0;
+                const o = state.o * 2*Math.PI / 360.0;
+                const f = a*e;
+                ellipse.position.x = f;
+
+                const b = Math.sqrt(a*a - f*f);
+                const path = new THREE.Shape();
+                path.absellipse(0, 0, a, b, 0, 2*Math.PI, false, 0);
+                const geometry = new THREE.ShapeBufferGeometry(path, 30);
+                ellipse.geometry = geometry;
+
+                orbitalPlane.rotation.x = i;
+                orbitalPlane.rotation.y = O;
+
+                ellipse.rotation.z = o;
+
+				renderer.render( scene, camera );
+			}
+
+            console.log(ellipse.position);
+            render();
+            controls.addEventListener('change', render);
+            window.addEventListener('resize', render);
+		</script>
+	</body>
+</html>
