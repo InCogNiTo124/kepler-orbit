@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>My first three.js app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-        <canvas id="canvas" style="width: 100%;height: 100%;"></canvas>
+    <head>
+        <meta charset="utf-8">
+        <title>My first three.js app</title>
+        <style>
+            body { margin: 0; }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
         <script type="importmap">
-			{
-				"imports": {
-					//"three": "../build/three.module.js"
-					"three": "https://unpkg.com/three/build/three.module.js",
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three/build/three.module.js",
                     "lil-gui": "https://unpkg.com/lil-gui@0.16.1/dist/lil-gui.esm.min.js"
-				}
-			}
-		</script>
-		<script type="module">
+                }
+            }
+        </script>
+        <script type="module">
             import GUI from 'lil-gui';
             import * as THREE from 'three';
             import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js';
@@ -74,26 +73,35 @@
 
             const canvas = document.querySelector("#canvas");
             const renderer = new THREE.WebGLRenderer({canvas});
-			const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+            camera.position.z = 1;
+            camera.position.x = 1;
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.target.set(0, 0, 0);
             controls.update();
 
             // scene
-			const scene = new THREE.Scene();
+            const scene = new THREE.Scene();
 
-			// planet
-			const sphereGeometry = new THREE.SphereGeometry(0.01);
+            // planet
+            const sphereGeometry = new THREE.SphereGeometry(0.01);
             const sphereMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
             const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
             scene.add(planet);
+
+            // yOmega rotation
+            const yaw = new THREE.Object3D();
+            const pitch = new THREE.Object3D();
+            yaw.add(pitch);
+            scene.add(yaw);
 
             // orbital plane
             const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
             const orbitalPlaneMat = new THREE.MeshBasicMaterial({color: 0x339933, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
             const orbitalPlane = new THREE.Mesh(orbitalPlaneGeo, orbitalPlaneMat);
             orbitalPlane.overdraw = true;
-            scene.add(orbitalPlane);
+            pitch.add(orbitalPlane);
 
             // ellipse
             const path = new THREE.Shape();
@@ -101,9 +109,12 @@
             const geometry = new THREE.ShapeBufferGeometry(path, 30);
             const material = new THREE.MeshBasicMaterial({color: 0x3f7b9d, side: THREE.DoubleSide});
             const ellipse = new THREE.Mesh(geometry, material);
-			orbitalPlane.add( ellipse ); // important
+            orbitalPlane.add( ellipse ); // important
 
-			// the invariable plane
+//             const helper = new THREE.PlaneHelper( ellipse, 1, 0xffff00 );
+//             scene.add(helper)
+
+            // the invariable plane
             const planeGeom = new THREE.PlaneGeometry(25, 25);
             planeGeom.rotateX(-Math.PI * 0.5); // this is how you can do it
             const planeMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
@@ -111,9 +122,6 @@
             plane.overdraw = true;
             scene.add(plane);
 
-
-
-			camera.position.z = 5;
 
             function resizeRendererToDisplaySize(renderer) {
                 const canvas = renderer.domElement;
@@ -134,7 +142,7 @@
                 ellipse.position.x = state.a * state.e;
             }
 
-			function render(time) {
+            function render(time) {
                 //time /= 1000.0;
 
                 if (resizeRendererToDisplaySize(renderer)) {
@@ -144,30 +152,40 @@
 
                 const a = state.a;
                 const e = state.e;
-                const i = state.i * 2*Math.PI / 360.0;
+                const i = (90 - state.i) * 2*Math.PI / 360.0;
                 const O = state.O * 2*Math.PI / 360.0;
                 const o = state.o * 2*Math.PI / 360.0;
                 const f = a*e;
-                ellipse.position.x = f;
 
                 const b = Math.sqrt(a*a - f*f);
                 const path = new THREE.Shape();
                 path.absellipse(0, 0, a, b, 0, 2*Math.PI, false, 0);
                 const geometry = new THREE.ShapeBufferGeometry(path, 30);
                 ellipse.geometry = geometry;
-
-                orbitalPlane.rotation.x = i;
-                orbitalPlane.rotation.y = O;
-
+                /* */
+                yaw.rotation.y = O;
+                pitch.rotation.x = i;
+//                 ellipse.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), O);
+//                 ellipse.rotation.x = i;
+//                 orbitalPlane.rotation.y = O;
+//                 orbitalPlane.rotation.x = i;
+//                 ellipse.setRotationFromEuler(new THREE.Euler(O, i, 0, 'YXZ'));
+                ellipse.position.sub(ellipse.position);
                 ellipse.rotation.z = o;
+                ellipse.translateX(f);
+                renderer.render( scene, camera );
+            }
 
-				renderer.render( scene, camera );
-			}
-
-            console.log(ellipse.position);
-            render();
+            [ellipse, plane, orbitalPlane].forEach((node) => {
+                const axes = new THREE.AxesHelper();
+                axes.material.depthTest = false;
+                axes.renderOrder = 1;
+                node.add(axes);
+            });
             controls.addEventListener('change', render);
             window.addEventListener('resize', render);
-		</script>
-	</body>
+            render();
+            console.log(scene);
+        </script>
+    </body>
 </html>
