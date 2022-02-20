@@ -50,7 +50,7 @@
             //settings.close(); // settings are closed at first
             const kepler = gui.addFolder('Keplerian elements');
             kepler.add(state, 'a', 0.1).min(0).step(0.1).onChange(render);
-            kepler.add(state, 'e', 0, 1.5).onChange(render);
+            kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
             kepler.add(state, 'i', 0, 360).onChange(render);
             kepler.add(state, 'O', 0, 360).onChange(render);
             kepler.add(state, 'o', 0, 360).onChange(render);
@@ -73,9 +73,9 @@
 
             const canvas = document.querySelector("#canvas");
             const renderer = new THREE.WebGLRenderer({canvas});
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000 );
 
-            camera.position.z = 1;
+            camera.position.y = 1;
             camera.position.x = 1;
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.target.set(0, 0, 0);
@@ -164,7 +164,7 @@
                 ellipse.geometry = geometry;
                 /* */
                 yaw.rotation.y = O;
-                pitch.rotation.x = i;
+                pitch.rotation.x = -i;
 //                 ellipse.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), O);
 //                 ellipse.rotation.x = i;
 //                 orbitalPlane.rotation.y = O;
@@ -172,7 +172,7 @@
 //                 ellipse.setRotationFromEuler(new THREE.Euler(O, i, 0, 'YXZ'));
                 ellipse.position.sub(ellipse.position);
                 ellipse.rotation.z = o;
-                ellipse.translateX(f);
+                ellipse.translateX(-f);
                 renderer.render( scene, camera );
             }
 
@@ -185,7 +185,6 @@
             controls.addEventListener('change', render);
             window.addEventListener('resize', render);
             render();
-            console.log(scene);
         </script>
     </body>
 </html>
