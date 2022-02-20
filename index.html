@@ -52,8 +52,8 @@
             kepler.add(state, 'a').min(0).step(0.1).onChange(render);
             kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
             kepler.add(state, 'i', 0, 360).onChange(render);
-            kepler.add(state, 'O', 0, 360).onChange(render);
-            kepler.add(state, 'o', 0, 360).onChange(render);
+            kepler.add(state, 'O', 0, 360).onChange(render).name("\u03A9");
+            kepler.add(state, 'o', 0, 360).onChange(render).name("\u03C9");
             //kepler.add(state, 'O', 0, 360).listen();
             //kepler.add(state, 'o', 0, 360).listen();
             //kepler.add(state, 'theta', 0, 360).listen();
