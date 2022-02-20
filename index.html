@@ -97,9 +97,7 @@
                 0, 0,
                 false,
                 0);
-//             let points = yawAngleCurve.getPoints(50);
-            const yawAngleGeometry = new THREE.BufferGeometry().setFromPoints(yawAngleCurve.getPoints(50).concat(new THREE.Vector2(0, 0)));
-//             const yawAngleGeometry = new THREE.CircleGeometry(2, 50, 0, 0);
+            const yawAngleGeometry = new THREE.BufferGeometry();
             const yawAngleMaterial = new THREE.LineBasicMaterial({color: 0x00ff00});
             const yawAngle = new THREE.LineLoop(yawAngleGeometry, yawAngleMaterial);
             yawAngle.rotation.x = -Math.PI / 2.0;
@@ -109,6 +107,19 @@
             const pitch = new THREE.Object3D();
             yaw.add(pitch);
             scene.add(yaw);
+
+            // pitch angle indicator
+            const pitchAngleCurve = new THREE.EllipseCurve(
+                0, 0,
+                2, 2,
+                0, 0,
+                false,
+                0);
+            const pitchAngleGeometry = new THREE.BufferGeometry();
+            const pitchAngleMaterial = new THREE.LineBasicMaterial({color: 0x0000ff});
+            const pitchAngle = new THREE.LineLoop(pitchAngleGeometry, pitchAngleMaterial);
+            pitchAngle.rotation.y = Math.PI / 2.0;
+            yaw.add(pitchAngle);
 
             // orbital plane
             const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
@@ -188,17 +199,19 @@
                 ellipse.rotation.z = o;
                 ellipse.translateX(-f);
 
-                // yaw angle
-//                 let yawAngleCurve = new THREE.EllipseCurve(
-//                 0, 0,
-//                 2, 2,
-//                 0, O,
-//                 false,
-//                 0);
+                // yaw indicator
                 yawAngleCurve.aEndAngle = O;
                 let points = yawAngleCurve.getPoints(50);
                 points.push(new THREE.Vector2(0.0, 0.0));
                 yawAngle.geometry.setFromPoints(points);
+
+                // pitch indicator
+                pitchAngleCurve.aEndAngle = Math.PI/2.0 -i;
+                let points2 = pitchAngleCurve.getPoints(50);
+                points2.push(new THREE.Vector2(0.0, 0.0));
+                pitchAngle.geometry.setFromPoints(points2);
+
+
                 renderer.render( scene, camera );
             }
 
