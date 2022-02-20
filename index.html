@@ -23,7 +23,7 @@
             import { OrbitControls } from 'https://unpkg.com/three/examples/jsm/controls/OrbitControls.js';
 
             const state = {
-                a: 1.0, // semi-major axis (units)
+                a: 2.0, // semi-major axis (units)
                 e: 0.1, // eccentricity (scalar)
                 i: 0.0, // inclination (radians)
                 O: 0.0, // RAAN (radians)
@@ -49,7 +49,7 @@
             //settings.add(state, 'distances', ['kilometers', 'AU', 'miles']);
             //settings.close(); // settings are closed at first
             const kepler = gui.addFolder('Keplerian elements');
-            kepler.add(state, 'a', 0.1).min(0).step(0.1).onChange(render);
+            kepler.add(state, 'a').min(0).step(0.1).onChange(render);
             kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
             kepler.add(state, 'i', 0, 360).onChange(render);
             kepler.add(state, 'O', 0, 360).onChange(render);
@@ -75,8 +75,8 @@
             const renderer = new THREE.WebGLRenderer({canvas});
             const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000 );
 
-            camera.position.y = 1;
-            camera.position.x = 1;
+            camera.position.y = 2;
+            camera.position.x = 3;
             const controls = new OrbitControls(camera, renderer.domElement);
             controls.target.set(0, 0, 0);
             controls.update();
@@ -85,12 +85,26 @@
             const scene = new THREE.Scene();
 
             // planet
-            const sphereGeometry = new THREE.SphereGeometry(0.01);
+            const sphereGeometry = new THREE.SphereGeometry(1);
             const sphereMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
             const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
             scene.add(planet);
 
-            // yOmega rotation
+            // yaw angle indicator
+            const yawAngleCurve = new THREE.EllipseCurve(
+                0, 0,
+                2, 2,
+                0, 0,
+                false,
+                0);
+//             let points = yawAngleCurve.getPoints(50);
+            const yawAngleGeometry = new THREE.BufferGeometry().setFromPoints(yawAngleCurve.getPoints(50).concat(new THREE.Vector2(0, 0)));
+//             const yawAngleGeometry = new THREE.CircleGeometry(2, 50, 0, 0);
+            const yawAngleMaterial = new THREE.LineBasicMaterial({color: 0x00ff00});
+            const yawAngle = new THREE.LineLoop(yawAngleGeometry, yawAngleMaterial);
+            yawAngle.rotation.x = -Math.PI / 2.0;
+            scene.add(yawAngle);
+
             const yaw = new THREE.Object3D();
             const pitch = new THREE.Object3D();
             yaw.add(pitch);
@@ -173,6 +187,18 @@
                 ellipse.position.sub(ellipse.position);
                 ellipse.rotation.z = o;
                 ellipse.translateX(-f);
+
+                // yaw angle
+//                 let yawAngleCurve = new THREE.EllipseCurve(
+//                 0, 0,
+//                 2, 2,
+//                 0, O,
+//                 false,
+//                 0);
+                yawAngleCurve.aEndAngle = O;
+                let points = yawAngleCurve.getPoints(50);
+                points.push(new THREE.Vector2(0.0, 0.0));
+                yawAngle.geometry.setFromPoints(points);
                 renderer.render( scene, camera );
             }
 
