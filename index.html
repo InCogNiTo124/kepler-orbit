@@ -121,6 +121,19 @@
             pitchAngle.rotation.y = Math.PI / 2.0;
             yaw.add(pitchAngle);
 
+            // periapsis indicator
+            const periapsisAngleCurve = new THREE.EllipseCurve(
+                0, 0,
+                2, 2,
+                0, 0,
+                false,
+                0);
+            const periapsisAngleGeometry = new THREE.BufferGeometry();
+            const periapsisAngleMaterial = new THREE.LineBasicMaterial({color: 0xff0000});
+            const periapsisAngle = new THREE.LineLoop(periapsisAngleGeometry, periapsisAngleMaterial);
+//             periapsisAngle.rotation.y = Math.PI / 2.0;
+            pitch.add(periapsisAngle);
+
             // orbital plane
             const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
             const orbitalPlaneMat = new THREE.MeshBasicMaterial({color: 0x339933, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
@@ -206,10 +219,16 @@
                 yawAngle.geometry.setFromPoints(points);
 
                 // pitch indicator
-                pitchAngleCurve.aEndAngle = Math.PI/2.0 -i;
+                pitchAngleCurve.aEndAngle = Math.PI/2.0 - i;
                 let points2 = pitchAngleCurve.getPoints(50);
                 points2.push(new THREE.Vector2(0.0, 0.0));
                 pitchAngle.geometry.setFromPoints(points2);
+
+                // pitch indicator
+                periapsisAngleCurve.aEndAngle = o;
+                let points3 = periapsisAngleCurve.getPoints(50);
+                points3.push(new THREE.Vector2(0.0, 0.0));
+                periapsisAngle.geometry.setFromPoints(points3);
 
 
                 renderer.render( scene, camera );
