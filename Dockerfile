@@ -1,4 +1,7 @@
 FROM node:alpine
-RUN npm install -g http-server
+RUN yarn global add serve
 WORKDIR /orbit
-CMD ["http-server"]
+COPY . .
+RUN yarn install
+RUN yarn build
+CMD ["serve", "dist"]

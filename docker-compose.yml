@@ -17,6 +17,4 @@ services:
       - "traefik.http.services.orbit.loadbalancer.server.port=80"
       - "traefik.docker.network=traefik_default"
     ports:
-      - "8080:8080"
-    volumes:
-      - "./:/orbit"
+      - "6090:3000"
