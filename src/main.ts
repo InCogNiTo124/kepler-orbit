@@ -1,6 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import sunTextureMap from '../textures/2k_sun.jpg';
 
 import GUI from 'lil-gui'
 
@@ -68,7 +69,9 @@ import GUI from 'lil-gui'
 
             // planet
             const sphereGeometry = new THREE.SphereGeometry(1);
-            const sphereMaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+            const sphereMaterial = new THREE.MeshBasicMaterial();
+            const texture = new THREE.TextureLoader().load(sunTextureMap, ()=>{renderer.render(scene, camera)});
+            sphereMaterial.map = texture;
             const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
             scene.add(planet);
 
