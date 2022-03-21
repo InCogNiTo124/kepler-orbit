@@ -94,7 +94,6 @@ const periapsisAngleCurve = new THREE.EllipseCurve(
 const periapsisAngleGeometry = new THREE.BufferGeometry();
 const periapsisAngleMaterial = new THREE.LineBasicMaterial({color: 0xff0000});
 const periapsisAngle = new THREE.LineLoop(periapsisAngleGeometry, periapsisAngleMaterial);
-   periapsisAngle.rotation.y = Math.PI / 2.0;
 pitch.add(periapsisAngle);
 
 // orbital plane
@@ -110,9 +109,6 @@ const geometry = new THREE.ShapeBufferGeometry(path, 30);
 const material = new THREE.MeshBasicMaterial({color: 0x3f7b9d, side: THREE.DoubleSide});
 const ellipse = new THREE.Mesh(geometry, material);
 orbitalPlane.add( ellipse ); // important
-
-   const helper = new THREE.PlaneHelper( ellipse, 1, 0xffff00 );
-   scene.add(helper)
 
 // the invariable plane
 const planeGeom = new THREE.PlaneGeometry(25, 25);
@@ -185,13 +181,6 @@ function render() {
 
     renderer.render( scene, camera );
 }
-
-[ellipse, plane, orbitalPlane].forEach((node) => {
-    const axes = new THREE.AxesHelper();
-    (axes.material as THREE.Material).depthTest = false;
-    axes.renderOrder = 1;
-    node.add(axes);
-});
 controls.addEventListener('change', render);
 window.addEventListener('resize', render);
 render();
