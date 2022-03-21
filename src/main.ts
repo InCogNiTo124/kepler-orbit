@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import sunTextureMap from '../textures/2k_sun.jpg';
+import moonTextureMap from '../textures/2k_moon.jpg';
 
 import GUI from 'lil-gui'
 
@@ -12,7 +13,7 @@ const state = {
     O: 0.0, // RAAN (radians)
     o: 0.0, // AoP (radians)
     theta: 0.0, // True anomaly (radians)
-    planet: "earth",
+    planet: "sun",
     angles: "degrees",
     distances: "AU",
     pos_x: 0.0,
@@ -26,6 +27,9 @@ const state = {
     arg_y: 0.0,
 };
 const gui = new GUI();
+gui.add(state, 'planet', {sun: sunTextureMap, moon: moonTextureMap}).onChange((e: string) => {
+    planet.material.map = new THREE.TextureLoader().load(e, ()=>{renderer.render(scene, camera)});
+})
 const kepler = gui.addFolder('Keplerian elements');
 kepler.add(state, 'a').min(0).step(0.1).onChange(render);
 kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
