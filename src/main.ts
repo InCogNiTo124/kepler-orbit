@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import sunTextureMap from '../textures/2k_sun.jpg';
 import moonTextureMap from '../textures/2k_moon.jpg';
+import earthTextureMap from '../textures/2k_earth_daymap.jpg';
 
 import GUI from 'lil-gui'
 
@@ -26,16 +27,26 @@ const state = {
     arg_x: 0.0,
     arg_y: 0.0,
 };
+interface Planet {
+    texture: string
+}
+const PLANETS = {
+    sun: {texture: sunTextureMap},
+    moon: {texture: moonTextureMap},
+    earth: {texture: earthTextureMap}
+}
+const loader = new THREE.TextureLoader();
 const gui = new GUI();
-gui.add(state, 'planet', {sun: sunTextureMap, moon: moonTextureMap}).onChange((e: string) => {
-    planet.material.map = new THREE.TextureLoader().load(e, ()=>{renderer.render(scene, camera)});
+gui.add(state, 'planet', PLANETS).onChange((e: Planet) => {
+    planet.material.map = loader.load(e.texture, ()=>{renderer.render(scene, camera)});
+    planet.material.needsUpdate = true;
 })
-const kepler = gui.addFolder('Keplerian elements');
-kepler.add(state, 'a').min(0).step(0.1).onChange(render);
-kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
-kepler.add(state, 'i', 0, 360).onChange(render);
-kepler.add(state, 'O', 0, 360).onChange(render).name("\u03A9");
-kepler.add(state, 'o', 0, 360).onChange(render).name("\u03C9");
+// const kepler = gui.addFolder('Keplerian elements');
+// kepler.add(state, 'a').min(0).step(0.1).onChange(render);
+// kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
+// kepler.add(state, 'i', 0, 360).onChange(render);
+// kepler.add(state, 'O', 0, 360).onChange(render).name("\u03A9");
+// kepler.add(state, 'o', 0, 360).onChange(render).name("\u03C9");
 const canvas: HTMLCanvasElement = document.querySelector("#canvas") as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({canvas});
 const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000 );
@@ -56,70 +67,6 @@ const texture = new THREE.TextureLoader().load(sunTextureMap, ()=>{renderer.rend
 sphereMaterial.map = texture;
 const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(planet);
-
-// yaw angle indicator
-const yawAngleCurve = new THREE.EllipseCurve(
-    0, 0,
-    2, 2,
-    0, 0,
-    false,
-    0);
-const yawAngleGeometry = new THREE.BufferGeometry();
-const yawAngleMaterial = new THREE.LineBasicMaterial({color: 0x00ff00});
-const yawAngle = new THREE.LineLoop(yawAngleGeometry, yawAngleMaterial);
-yawAngle.rotation.x = -Math.PI / 2.0;
-scene.add(yawAngle);
-
-const yaw = new THREE.Object3D();
-const pitch = new THREE.Object3D();
-yaw.add(pitch);
-scene.add(yaw);
-
-// pitch angle indicator
-const pitchAngleCurve = new THREE.EllipseCurve(
-    0, 0,
-    2, 2,
-    0, 0,
-    false,
-    0);
-const pitchAngleGeometry = new THREE.BufferGeometry();
-const pitchAngleMaterial = new THREE.LineBasicMaterial({color: 0x0000ff});
-const pitchAngle = new THREE.LineLoop(pitchAngleGeometry, pitchAngleMaterial);
-pitchAngle.rotation.y = Math.PI / 2.0;
-yaw.add(pitchAngle);
-
-// periapsis indicator
-const periapsisAngleCurve = new THREE.EllipseCurve(
-    0, 0,
-    2, 2,
-    0, 0,
-    false,
-    0);
-const periapsisAngleGeometry = new THREE.BufferGeometry();
-const periapsisAngleMaterial = new THREE.LineBasicMaterial({color: 0xff0000});
-const periapsisAngle = new THREE.LineLoop(periapsisAngleGeometry, periapsisAngleMaterial);
-pitch.add(periapsisAngle);
-
-// orbital plane
-const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
-const orbitalPlaneMat = new THREE.MeshBasicMaterial({color: 0x339933, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
-const orbitalPlane = new THREE.Mesh(orbitalPlaneGeo, orbitalPlaneMat);
-pitch.add(orbitalPlane);
-
-// ellipse
-const path = new THREE.Shape();
-path.absellipse(0, 0, 4, 2, 0, 2*Math.PI, false, 0);
-const geometry = new THREE.ShapeBufferGeometry(path, 30);
-const material = new THREE.MeshBasicMaterial({color: 0x3f7b9d, side: THREE.DoubleSide});
-const ellipse = new THREE.Mesh(geometry, material);
-orbitalPlane.add( ellipse ); // important
-
-// the invariable plane
-const planeGeom = new THREE.PlaneGeometry(25, 25);
-planeGeom.rotateX(-Math.PI * 0.5); // this is how you can do it
-const planeMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
-const plane = new THREE.Mesh(planeGeom, planeMat);
-scene.add(plane);
 
 
 function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
@@ -145,44 +92,7 @@ function render() {
         camera.updateProjectionMatrix();
     }
 
-    const a = state.a;
-    const e = state.e;
-    const i = (90 - state.i) * 2*Math.PI / 360.0;
-    const O = state.O * 2*Math.PI / 360.0;
-    const o = state.o * 2*Math.PI / 360.0;
-    const f = a*e;
-
-    const b = Math.sqrt(a*a - f*f);
-    const path = new THREE.Shape();
-    path.absellipse(0, 0, a, b, 0, 2*Math.PI, false, 0);
-    const geometry = new THREE.ShapeBufferGeometry(path, 30);
-    ellipse.geometry = geometry;
-    /* */
-    yaw.rotation.y = O;
-    pitch.rotation.x = -i;
-    ellipse.position.sub(ellipse.position);
-    ellipse.rotation.z = o;
-    ellipse.translateX(-f);
-
-    // yaw indicator
-    yawAngleCurve.aEndAngle = O;
-    let points = yawAngleCurve.getPoints(50);
-    points.push(new THREE.Vector2(0.0, 0.0));
-    yawAngle.geometry.setFromPoints(points);
-
-    // pitch indicator
-    pitchAngleCurve.aEndAngle = Math.PI/2.0 - i;
-    let points2 = pitchAngleCurve.getPoints(50);
-    points2.push(new THREE.Vector2(0.0, 0.0));
-    pitchAngle.geometry.setFromPoints(points2);
-
-    // pitch indicator
-    periapsisAngleCurve.aEndAngle = o;
-    let points3 = periapsisAngleCurve.getPoints(50);
-    points3.push(new THREE.Vector2(0.0, 0.0));
-    periapsisAngle.geometry.setFromPoints(points3);
-
-
+    
     renderer.render( scene, camera );
 }
 controls.addEventListener('change', render);
