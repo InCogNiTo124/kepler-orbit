@@ -1,45 +1,41 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import sunTextureMap from '../textures/2k_sun.jpg';
-import moonTextureMap from '../textures/2k_moon.jpg';
-import earthTextureMap from '../textures/2k_earth_daymap.jpg';
+import {planets} from './planets';
+
 
 import GUI from 'lil-gui'
 
 const state = {
-    a: 2.0, // semi-major axis (units)
-    e: 0.1, // eccentricity (scalar)
-    i: 0.0, // inclination (radians)
-    O: 0.0, // RAAN (radians)
-    o: 0.0, // AoP (radians)
-    theta: 0.0, // True anomaly (radians)
-    planet: "sun",
+    // a: 2.0, // semi-major axis (units)
+    // e: 0.1, // eccentricity (scalar)
+    // i: 0.0, // inclination (radians)
+    // O: 0.0, // RAAN (radians)
+    // o: 0.0, // AoP (radians)
+    // theta: 0.0, // True anomaly (radians)
+    planet: "Sun",
     angles: "degrees",
     distances: "AU",
-    pos_x: 0.0,
-    pos_y: 0.0,
-    pos_z: 0.0,
-    vel_x: 0.0,
-    vel_y: 0.0,
-    vel_z: 0.0,
-    v: 0.0,
-    arg_x: 0.0,
-    arg_y: 0.0,
+    // pos_x: 0.0,
+    // pos_y: 0.0,
+    // pos_z: 0.0,
+    // vel_x: 0.0,
+    // vel_y: 0.0,
+    // vel_z: 0.0,
+    // v: 0.0,
+    // arg_x: 0.0,
+    // arg_y: 0.0,
 };
-interface Planet {
-    texture: string
+
+const planetNames: { [key: string]: string}= {
+    Sun: "sol",
+    Moon: "lun",
+    Earth: "ter", 
+    Saturn: "sat",
 }
-const PLANETS = {
-    sun: {texture: sunTextureMap},
-    moon: {texture: moonTextureMap},
-    earth: {texture: earthTextureMap}
-}
-const loader = new THREE.TextureLoader();
 const gui = new GUI();
-gui.add(state, 'planet', PLANETS).onChange((e: Planet) => {
-    planet.material.map = loader.load(e.texture, ()=>{renderer.render(scene, camera)});
-    planet.material.needsUpdate = true;
+gui.add(state, 'planet', planetNames).onChange((e: string) => {
+    createPlanet(celestialBody, e);
 })
 // const kepler = gui.addFolder('Keplerian elements');
 // kepler.add(state, 'a').min(0).step(0.1).onChange(render);
@@ -61,12 +57,9 @@ controls.update();
 const scene = new THREE.Scene();
 
 // planet
-const sphereGeometry = new THREE.SphereGeometry(1);
-const sphereMaterial = new THREE.MeshBasicMaterial();
-const texture = new THREE.TextureLoader().load(sunTextureMap, ()=>{renderer.render(scene, camera)});
-sphereMaterial.map = texture;
-const planet = new THREE.Mesh(sphereGeometry, sphereMaterial);
-scene.add(planet);
+const celestialBody = new THREE.Object3D();
+createPlanet(celestialBody, planetNames[state.planet]);
+scene.add(celestialBody);
 
 
 function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
@@ -98,3 +91,9 @@ function render() {
 controls.addEventListener('change', render);
 window.addEventListener('resize', render);
 render();
+
+function createPlanet(celestialBody: THREE.Object3D, planet: string) {
+    celestialBody.children.length = 0; // remove all children by letting the GC do its thing
+    celestialBody.add(planets[planet]);
+    render();
+}
