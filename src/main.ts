@@ -5,6 +5,19 @@ import {planets} from './planets';
 
 
 import GUI from 'lil-gui'
+import { random16 } from 'three/src/math/MathUtils';
+
+interface OrbitState {
+    a: number, // semi-major axis (units)
+    e: number, // eccentricity (scalar)
+    i: number, // inclination (radians)
+    O: number, // RAAN (radians)
+    o: number, // AoP (radians)
+    theta: number, // True anomaly (radians)}
+    remove: Function
+}
+// https://stackoverflow.com/a/58326357
+const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 const state = {
     // a: 2.0, // semi-major axis (units)
@@ -16,6 +29,33 @@ const state = {
     planet: "Sun",
     angles: "degrees",
     distances: "AU",
+    newOrbit: function() {
+        let folderName = "Orbit " + genRanHex(6);
+        let newFolder = gui.addFolder(folderName);
+        let newOrbitState: OrbitState  = {
+            a: Math.random()*9+1,
+            e: Math.random()*(1-1e-7),
+            i: Math.random()*360,
+            O: Math.random()*360,
+            o: Math.random()*360,
+            theta: 0.0,
+            remove: function() {
+                let index = state.orbitStates.indexOf(newOrbitState);
+                state.orbitStates.splice(index, 1); // remove that orbit state
+                newFolder.destroy();
+                // console.log('state.orbits.length', state.orbits.length);
+            }
+        };
+        state.orbitStates.push(newOrbitState);
+        newFolder.add(newOrbitState, 'a', 0);
+        newFolder.add(newOrbitState, 'e', 0, 1-1e-7);
+        newFolder.add(newOrbitState, 'i', 0, 360);
+        newFolder.add(newOrbitState, 'O', 0, 360).name("\u03A9");
+        newFolder.add(newOrbitState, 'o', 0, 360).name("\u03C9");
+        newFolder.add(newOrbitState, 'remove').name("Remove");
+        // console.log('state.orbits.length', state.orbits.length)
+    },
+    orbitStates: [] as OrbitState[]
     // pos_x: 0.0,
     // pos_y: 0.0,
     // pos_z: 0.0,
@@ -36,7 +76,8 @@ const planetNames: { [key: string]: string}= {
 const gui = new GUI();
 gui.add(state, 'planet', planetNames).onChange((e: string) => {
     createPlanet(celestialBody, e);
-})
+}).name('Planet');
+gui.add(state, 'newOrbit').name('New orbit!')
 // const kepler = gui.addFolder('Keplerian elements');
 // kepler.add(state, 'a').min(0).step(0.1).onChange(render);
 // kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
