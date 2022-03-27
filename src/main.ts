@@ -36,12 +36,6 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     root.add(yaw);
 
     // pitch angle indicator
-    const pitchAngleCurve = new THREE.EllipseCurve(
-        0, 0,
-        2, 2,
-        0, 0,
-        false,
-        0);
     const pitchAngleGeometry = new THREE.BufferGeometry();
     const pitchAngleMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
     const pitchAngle = new THREE.LineLoop(pitchAngleGeometry, pitchAngleMaterial);
@@ -113,11 +107,28 @@ const state = {
         let newOrbit = createOrbit(newOrbitState);
         newFolder.add(newOrbitState, 'a', 0);
         newFolder.add(newOrbitState, 'e', 0, 1 - 1e-7);
-        newFolder.add(newOrbitState, 'i', 0, 360);
+        newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
+            let pitchAngle = newOrbit.children[1].children[1] as THREE.LineLoop;
+            let pitch = newOrbit.children[1].children[0];
+            const i = (90 - e) * 2 * Math.PI / 360.0;
+            // pitch indicator
+            const pitchAngleCurve = new THREE.EllipseCurve(
+                0, 0,
+                2, 2,
+                0, 0,
+                false,
+                0);
+            pitchAngleCurve.aEndAngle = Math.PI / 2.0 - i;
+            let points = pitchAngleCurve.getPoints(50);
+            points.push(new THREE.Vector2(0.0, 0.0));
+            pitchAngle.geometry.setFromPoints(points);
+            pitch.rotation.x = -i;
+            render();
+        })
         newFolder.add(newOrbitState, 'O', 0, 360).name("\u03A9").onChange((e: number) => {
             let yawAngle = newOrbit.children[0] as THREE.LineLoop;
             let yaw = newOrbit.children[1];
-            let O = e * 2*Math.PI / 360;
+            let O = e * 2 * Math.PI / 360;
             // yaw indicator
             const yawAngleCurve = new THREE.EllipseCurve(
                 0, 0,
