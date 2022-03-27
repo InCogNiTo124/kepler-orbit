@@ -29,6 +29,7 @@ const state = {
     planet: "Sun",
     angles: "degrees",
     distances: "AU",
+    showEcliptic: true,
     newOrbit: function() {
         let folderName = "Orbit " + genRanHex(6);
         let newFolder = gui.addFolder(folderName);
@@ -78,6 +79,10 @@ gui.add(state, 'planet', planetNames).onChange((e: string) => {
     createPlanet(celestialBody, e);
 }).name('Planet');
 gui.add(state, 'newOrbit').name('New orbit!')
+gui.add(state, 'showEcliptic').name('Show ecliptic plane').onChange((e: boolean) =>{
+    ecliptic.visible = e;
+    render();
+})
 // const kepler = gui.addFolder('Keplerian elements');
 // kepler.add(state, 'a').min(0).step(0.1).onChange(render);
 // kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
@@ -102,6 +107,12 @@ const celestialBody = new THREE.Object3D();
 createPlanet(celestialBody, planetNames[state.planet]);
 scene.add(celestialBody);
 
+// the invariable plane
+const planeGeom = new THREE.PlaneGeometry(25, 25);
+planeGeom.rotateX(-Math.PI * 0.5); // this is how you can do it
+const planeMat = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.2, side: THREE.DoubleSide});
+const ecliptic = new THREE.Mesh(planeGeom, planeMat);
+scene.add(ecliptic);
 
 function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
     const canvas = renderer.domElement;
