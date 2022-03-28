@@ -5,8 +5,16 @@ import { planets } from './planets';
 
 import GUI from 'lil-gui'
 
+const ORBIT_POINTS_COUNT=255;
 
 
+function radians(degrees: number) {
+    return degrees * Math.PI / 180;
+}
+
+function degrees(radians: number) {
+    return radians * 180 / Math.PI;
+}
 
 interface OrbitState {
     a: number, // semi-major axis (units)
@@ -21,41 +29,45 @@ interface OrbitState {
 const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
 
+function createOrbitPart(name: string, color: number, endAngle: number) {
+    const curve = new THREE.EllipseCurve(
+        0, 0,
+        2, 2,
+        0, endAngle,
+        false,
+        0);
+    let points = curve.getPoints(ORBIT_POINTS_COUNT);
+    points.push(new THREE.Vector2());
+    const angleGeometry = new THREE.BufferGeometry();
+    angleGeometry.setFromPoints(points);
+    const angleMaterial = new THREE.LineBasicMaterial({ color: color });
+    const angle = new THREE.LineLoop(angleGeometry, angleMaterial);
+    angle.name = name;
+    return angle;
+}
+
 function createOrbit(orbitState: OrbitState): THREE.Object3D {
     let root = new THREE.Object3D();
-    // yaw angle indicator
-    const yawAngleGeometry = new THREE.BufferGeometry();
-    const yawAngleMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
-    const yawAngle = new THREE.LineLoop(yawAngleGeometry, yawAngleMaterial);
-    yawAngle.name = 'yawAngle';
-    yawAngle.rotation.x = -Math.PI / 2.0;
+
+    let yawAngle = createOrbitPart('yawAngle', 0x00ff00, radians(orbitState.O));
+    yawAngle.rotation.x = radians(-90);
     root.add(yawAngle);
 
     const yaw = new THREE.Object3D();
     yaw.name = 'yaw';
+    yaw.rotation.y = radians(orbitState.O);
     const pitch = new THREE.Object3D();
     pitch.name = 'pitch';
+    pitch.rotation.x = radians(orbitState.i+90);
     yaw.add(pitch);
     root.add(yaw);
 
-    // pitch angle indicator
-    const pitchAngleGeometry = new THREE.BufferGeometry();
-    const pitchAngleMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
-    const pitchAngle = new THREE.LineLoop(pitchAngleGeometry, pitchAngleMaterial);
-    pitchAngle.name = 'pitchAngle';
-    pitchAngle.rotation.y = Math.PI / 2.0;
+    let pitchAngle = createOrbitPart('pitchAngle', 0x0000ff, radians(orbitState.i));
+    pitchAngle.rotation.y = radians(90);
     yaw.add(pitchAngle);
 
-    // periapsis indicator
-    const periapsisAngleCurve = new THREE.EllipseCurve(
-        0, 0,
-        2, 2,
-        0, 0,
-        false,
-        0);
-    const periapsisAngleGeometry = new THREE.BufferGeometry();
-    const periapsisAngleMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    const periapsisAngle = new THREE.LineLoop(periapsisAngleGeometry, periapsisAngleMaterial);
+    
+    let periapsisAngle = createOrbitPart('periapsisAngle', 0xff0000, 0);
     pitch.add(periapsisAngle);
 
     // orbital plane
@@ -114,15 +126,14 @@ const state = {
         newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
             let pitchAngle = newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop;
             let pitch = newOrbit.getObjectByName('pitch') as THREE.Object3D;
-            const i = (90 - e) * 2 * Math.PI / 360.0;
+            const i = radians(90-e);
             // pitch indicator
             const pitchAngleCurve = new THREE.EllipseCurve(
                 0, 0,
                 2, 2,
-                0, 0,
+                0, Math.PI/2.0 -i,
                 false,
                 0);
-            pitchAngleCurve.aEndAngle = Math.PI / 2.0 - i;
             let points = pitchAngleCurve.getPoints(50);
             points.push(new THREE.Vector2(0.0, 0.0));
             pitchAngle.geometry.setFromPoints(points);
