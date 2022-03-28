@@ -27,11 +27,14 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const yawAngleGeometry = new THREE.BufferGeometry();
     const yawAngleMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 });
     const yawAngle = new THREE.LineLoop(yawAngleGeometry, yawAngleMaterial);
+    yawAngle.name = 'yawAngle';
     yawAngle.rotation.x = -Math.PI / 2.0;
     root.add(yawAngle);
 
     const yaw = new THREE.Object3D();
+    yaw.name = 'yaw';
     const pitch = new THREE.Object3D();
+    pitch.name = 'pitch';
     yaw.add(pitch);
     root.add(yaw);
 
@@ -39,6 +42,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const pitchAngleGeometry = new THREE.BufferGeometry();
     const pitchAngleMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
     const pitchAngle = new THREE.LineLoop(pitchAngleGeometry, pitchAngleMaterial);
+    pitchAngle.name = 'pitchAngle';
     pitchAngle.rotation.y = Math.PI / 2.0;
     yaw.add(pitchAngle);
 
@@ -108,8 +112,8 @@ const state = {
         newFolder.add(newOrbitState, 'a', 0);
         newFolder.add(newOrbitState, 'e', 0, 1 - 1e-7);
         newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
-            let pitchAngle = newOrbit.children[1].children[1] as THREE.LineLoop;
-            let pitch = newOrbit.children[1].children[0];
+            let pitchAngle = newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop;
+            let pitch = newOrbit.getObjectByName('pitch') as THREE.Object3D;
             const i = (90 - e) * 2 * Math.PI / 360.0;
             // pitch indicator
             const pitchAngleCurve = new THREE.EllipseCurve(
@@ -126,8 +130,8 @@ const state = {
             render();
         })
         newFolder.add(newOrbitState, 'O', 0, 360).name("\u03A9").onChange((e: number) => {
-            let yawAngle = newOrbit.children[0] as THREE.LineLoop;
-            let yaw = newOrbit.children[1];
+            let yawAngle = newOrbit.getObjectByName('yawAngle') as THREE.LineLoop;
+            let yaw = newOrbit.getObjectByName('yaw') as THREE.Object3D;
             let O = e * 2 * Math.PI / 360;
             // yaw indicator
             const yawAngleCurve = new THREE.EllipseCurve(
