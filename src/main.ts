@@ -5,7 +5,7 @@ import { planets } from './planets';
 
 import GUI from 'lil-gui'
 
-const ORBIT_POINTS_COUNT=255;
+const ORBIT_POINTS_COUNT = 255;
 
 
 function radians(degrees: number) {
@@ -58,7 +58,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     yaw.rotation.y = radians(orbitState.O);
     const pitch = new THREE.Object3D();
     pitch.name = 'pitch';
-    pitch.rotation.x = radians(orbitState.i+90);
+    pitch.rotation.x = radians(orbitState.i + 90);
     yaw.add(pitch);
     root.add(yaw);
 
@@ -66,8 +66,8 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     pitchAngle.rotation.y = radians(90);
     yaw.add(pitchAngle);
 
-    
-    let periapsisAngle = createOrbitPart('periapsisAngle', 0xff0000, 0);
+
+    let periapsisAngle = createOrbitPart('periapsisAngle', 0xff0000, radians(orbitState.o));
     pitch.add(periapsisAngle);
 
     // orbital plane
@@ -82,6 +82,8 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const geometry = new THREE.ShapeBufferGeometry(path, 128);
     const material = new THREE.MeshBasicMaterial({ color: 0x3f7b9d, side: THREE.DoubleSide });
     const ellipse = new THREE.Mesh(geometry, material);
+    ellipse.name = 'ellipse';
+    ellipse.rotation.z = radians(orbitState.o);
     orbitalPlane.add(ellipse); // important
 
     return root;
@@ -126,12 +128,12 @@ const state = {
         newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
             let pitchAngle = newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop;
             let pitch = newOrbit.getObjectByName('pitch') as THREE.Object3D;
-            const i = radians(90-e);
+            const i = radians(90 - e);
             // pitch indicator
             const pitchAngleCurve = new THREE.EllipseCurve(
                 0, 0,
                 2, 2,
-                0, Math.PI/2.0 -i,
+                0, Math.PI / 2.0 - i,
                 false,
                 0);
             let points = pitchAngleCurve.getPoints(50);
@@ -143,7 +145,7 @@ const state = {
         newFolder.add(newOrbitState, 'O', 0, 360).name("\u03A9").onChange((e: number) => {
             let yawAngle = newOrbit.getObjectByName('yawAngle') as THREE.LineLoop;
             let yaw = newOrbit.getObjectByName('yaw') as THREE.Object3D;
-            let O = e * 2 * Math.PI / 360;
+            let O = radians(e);
             // yaw indicator
             const yawAngleCurve = new THREE.EllipseCurve(
                 0, 0,
@@ -158,7 +160,23 @@ const state = {
             yaw.rotation.y = O;
             render();
         })
-        newFolder.add(newOrbitState, 'o', 0, 360).name("\u03C9");
+        newFolder.add(newOrbitState, 'o', 0, 360).name("\u03C9").onChange((e: number) => {
+            let periapsisAngle = newOrbit.getObjectByName('periapsisAngle') as THREE.LineLoop;
+            let ellipse = newOrbit.getObjectByName('ellipse') as THREE.Object3D;
+            let o = radians(e);
+
+            const periapsisAngleCurve = new THREE.EllipseCurve(
+                0, 0,
+                2, 2,
+                0, o,
+                false,
+                0);
+            let points = periapsisAngleCurve.getPoints(50);
+            points.push(new THREE.Vector2(0.0, 0.0));
+            periapsisAngle.geometry.setFromPoints(points);
+            ellipse.rotation.z = o;
+            render();
+        });
         newFolder.add(newOrbitState, 'remove').name("Remove");
         // state.orbits.push(newOrbit);
         scene.add(newOrbit);
