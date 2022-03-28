@@ -35,7 +35,9 @@ interface OrbitState {
     O: number, // RAAN (radians)
     o: number, // AoP (radians)
     theta: number, // True anomaly (radians)}
-    remove: Function
+    remove: Function,
+    showGuides: boolean,
+    showOrbitalPlane: boolean
 }
 // https://stackoverflow.com/a/58326357
 const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
@@ -86,6 +88,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const orbitalPlaneGeo = new THREE.PlaneGeometry(25, 25);
     const orbitalPlaneMat = new THREE.MeshBasicMaterial({ color: 0x339933, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
     const orbitalPlane = new THREE.Mesh(orbitalPlaneGeo, orbitalPlaneMat);
+    orbitalPlane.name = 'orbitalPlane';
     pitch.add(orbitalPlane);
 
     // ellipse
@@ -97,7 +100,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const material = new THREE.MeshBasicMaterial({ color: 0x3f7b9d, side: THREE.DoubleSide });
     const ellipse = new THREE.Mesh(geometry, material);
     ellipse.name = 'ellipse';
-    
+
     ellipse.position.sub(ellipse.position);
     ellipse.rotation.z = radians(orbitState.o);
 
@@ -128,6 +131,8 @@ const state = {
             O: Math.random() * 360,
             o: Math.random() * 360,
             theta: 0.0,
+            showGuides: true,
+            showOrbitalPlane: true,
             remove: function () {
                 let orbitStateIndex = state.orbitStates.indexOf(newOrbitState);
                 state.orbitStates.splice(orbitStateIndex, 1); // remove that orbit state
@@ -202,13 +207,23 @@ const state = {
             periapsisAngle.geometry.setFromPoints(points);
 
 
-    ellipse.position.sub(ellipse.position);
-    ellipse.rotation.z = o;
-    ellipse.translateX(-f);
+            ellipse.position.sub(ellipse.position);
+            ellipse.rotation.z = o;
+            ellipse.translateX(-f);
             render();
         });
         newFolder.add(newOrbitState, 'remove').name("Remove");
         // state.orbits.push(newOrbit);
+        newFolder.add(newOrbitState, 'showGuides').name('Show guides').onChange((e: boolean) => {
+            ((newOrbit.getObjectByName('periapsisAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
+            ((newOrbit.getObjectByName('yawAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
+            ((newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
+            render();
+        });
+        newFolder.add(newOrbitState, 'showOrbitalPlane').name('Show orbital plane').onChange((e: boolean) => {
+            ((newOrbit.getObjectByName('orbitalPlane') as THREE.Mesh).material as THREE.Material).visible = e;
+            render();
+        });
         scene.add(newOrbit);
         render();
         // console.log('state.orbits.length', state.orbits.length)
