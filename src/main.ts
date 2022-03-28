@@ -212,7 +212,6 @@ const state = {
             ellipse.translateX(-f);
             render();
         });
-        newFolder.add(newOrbitState, 'remove').name("Remove");
         // state.orbits.push(newOrbit);
         newFolder.add(newOrbitState, 'showGuides').name('Show guides').onChange((e: boolean) => {
             ((newOrbit.getObjectByName('periapsisAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
@@ -224,6 +223,7 @@ const state = {
             ((newOrbit.getObjectByName('orbitalPlane') as THREE.Mesh).material as THREE.Material).visible = e;
             render();
         });
+        newFolder.add(newOrbitState, 'remove').name("Remove");
         scene.add(newOrbit);
         render();
         // console.log('state.orbits.length', state.orbits.length)
