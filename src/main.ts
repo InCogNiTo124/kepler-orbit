@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { planets } from './planets';
 
 import GUI from 'lil-gui'
+import { RedIntegerFormat } from 'three';
 
 const ORBIT_POINTS_COUNT = 255;
 
@@ -14,6 +15,18 @@ function radians(degrees: number) {
 
 function degrees(radians: number) {
     return radians * 180 / Math.PI;
+}
+
+function orbitShapeHandler(ellipse: THREE.Mesh, a: number, e: number, o: number) {
+    let f = a * e;
+    let b = Math.sqrt(a * a - f * f);
+    const path = new THREE.Shape();
+    path.absellipse(0, 0, a, b, 0, 2 * Math.PI, false, 0);
+    const geometry = new THREE.ShapeBufferGeometry(path, ORBIT_POINTS_COUNT);
+    ellipse.geometry = geometry;
+    ellipse.position.sub(ellipse.position);
+    ellipse.rotation.z = o;
+    ellipse.translateX(-f);
 }
 
 interface OrbitState {
@@ -58,7 +71,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     yaw.rotation.y = radians(orbitState.O);
     const pitch = new THREE.Object3D();
     pitch.name = 'pitch';
-    pitch.rotation.x = radians(orbitState.i + 90);
+    pitch.rotation.x = -radians(90 - orbitState.i);
     yaw.add(pitch);
     root.add(yaw);
 
@@ -77,13 +90,19 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     pitch.add(orbitalPlane);
 
     // ellipse
+    let f = orbitState.a * orbitState.e;
+    let b = Math.sqrt(orbitState.a * orbitState.a - f * f);
     const path = new THREE.Shape();
-    path.absellipse(0, 0, 4, 2, 0, 2 * Math.PI, false, 0);
-    const geometry = new THREE.ShapeBufferGeometry(path, 128);
+    path.absellipse(0, 0, orbitState.a, b, 0, 2 * Math.PI, false, 0);
+    const geometry = new THREE.ShapeBufferGeometry(path, ORBIT_POINTS_COUNT);
     const material = new THREE.MeshBasicMaterial({ color: 0x3f7b9d, side: THREE.DoubleSide });
     const ellipse = new THREE.Mesh(geometry, material);
     ellipse.name = 'ellipse';
+    
+    ellipse.position.sub(ellipse.position);
     ellipse.rotation.z = radians(orbitState.o);
+
+    ellipse.translateX(-f);
     orbitalPlane.add(ellipse); // important
 
     return root;
@@ -123,8 +142,16 @@ const state = {
         };
         state.orbitStates.push(newOrbitState);
         let newOrbit = createOrbit(newOrbitState);
-        newFolder.add(newOrbitState, 'a', 0);
-        newFolder.add(newOrbitState, 'e', 0, 1 - 1e-7);
+        newFolder.add(newOrbitState, 'a', 0).onChange(() => {
+            let ellipse = newOrbit.getObjectByName('ellipse') as THREE.Mesh;
+            orbitShapeHandler(ellipse, newOrbitState.a, newOrbitState.e, radians(newOrbitState.o));
+            render();
+        });
+        newFolder.add(newOrbitState, 'e', 0, 1 - 1e-7).onChange(() => {
+            let ellipse = newOrbit.getObjectByName('ellipse') as THREE.Mesh;
+            orbitShapeHandler(ellipse, newOrbitState.a, newOrbitState.e, radians(newOrbitState.o));
+            render();
+        });
         newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
             let pitchAngle = newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop;
             let pitch = newOrbit.getObjectByName('pitch') as THREE.Object3D;
@@ -164,7 +191,7 @@ const state = {
             let periapsisAngle = newOrbit.getObjectByName('periapsisAngle') as THREE.LineLoop;
             let ellipse = newOrbit.getObjectByName('ellipse') as THREE.Object3D;
             let o = radians(e);
-
+            let f = newOrbitState.a * newOrbitState.e;
             const periapsisAngleCurve = new THREE.EllipseCurve(
                 0, 0,
                 2, 2,
@@ -174,7 +201,11 @@ const state = {
             let points = periapsisAngleCurve.getPoints(50);
             points.push(new THREE.Vector2(0.0, 0.0));
             periapsisAngle.geometry.setFromPoints(points);
-            ellipse.rotation.z = o;
+
+
+    ellipse.position.sub(ellipse.position);
+    ellipse.rotation.z = o;
+    ellipse.translateX(-f);
             render();
         });
         newFolder.add(newOrbitState, 'remove').name("Remove");
