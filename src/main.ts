@@ -4,7 +4,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { planets } from './planets';
 
 import GUI from 'lil-gui'
-import { RedIntegerFormat } from 'three';
 
 const ORBIT_POINTS_COUNT = 255;
 
@@ -13,9 +12,9 @@ function radians(degrees: number) {
     return degrees * Math.PI / 180;
 }
 
-function degrees(radians: number) {
-    return radians * 180 / Math.PI;
-}
+// function degrees(radians: number) {
+//     return radians * 180 / Math.PI;
+// }
 
 function orbitShapeHandler(ellipse: THREE.Mesh, a: number, e: number, o: number) {
     let f = a * e;
