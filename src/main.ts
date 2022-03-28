@@ -60,7 +60,7 @@ function createOrbitPart(name: string, color: number, endAngle: number) {
     return angle;
 }
 
-function createOrbit(orbitState: OrbitState): THREE.Object3D {
+function createOrbit(orbitState: OrbitState, orbitColor: string): THREE.Object3D {
     let root = new THREE.Object3D();
 
     let yawAngle = createOrbitPart('yawAngle', 0x00ff00, radians(orbitState.O));
@@ -97,7 +97,7 @@ function createOrbit(orbitState: OrbitState): THREE.Object3D {
     const path = new THREE.Shape();
     path.absellipse(0, 0, orbitState.a, b, 0, 2 * Math.PI, false, 0);
     const geometry = new THREE.ShapeBufferGeometry(path, ORBIT_POINTS_COUNT);
-    const material = new THREE.MeshBasicMaterial({ color: 0x3f7b9d, side: THREE.DoubleSide });
+    const material = new THREE.MeshBasicMaterial({ color: "#"+orbitColor, side: THREE.DoubleSide });
     const ellipse = new THREE.Mesh(geometry, material);
     ellipse.name = 'ellipse';
 
@@ -122,7 +122,8 @@ const state = {
     distances: "AU",
     showEcliptic: true,
     newOrbit: function () {
-        let folderName = "Orbit " + genRanHex(6);
+        let orbitName = genRanHex(6);
+        let folderName = "Orbit " + orbitName;
         let newFolder = gui.addFolder(folderName);
         let newOrbitState: OrbitState = {
             a: Math.random() * 9 + 1,
@@ -145,7 +146,7 @@ const state = {
             }
         };
         state.orbitStates.push(newOrbitState);
-        let newOrbit = createOrbit(newOrbitState);
+        let newOrbit = createOrbit(newOrbitState, orbitName);
         newFolder.add(newOrbitState, 'a', 0).onChange(() => {
             let ellipse = newOrbit.getObjectByName('ellipse') as THREE.Mesh;
             orbitShapeHandler(ellipse, newOrbitState.a, newOrbitState.e, radians(newOrbitState.o));
