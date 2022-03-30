@@ -111,12 +111,6 @@ function createOrbit(orbitState: OrbitState, orbitColor: string): THREE.Object3D
 }
 
 const state = {
-    // a: 2.0, // semi-major axis (units)
-    // e: 0.1, // eccentricity (scalar)
-    // i: 0.0, // inclination (radians)
-    // O: 0.0, // RAAN (radians)
-    // o: 0.0, // AoP (radians)
-    // theta: 0.0, // True anomaly (radians)
     planet: "Sun",
     angles: "degrees",
     distances: "AU",
@@ -126,12 +120,12 @@ const state = {
         let folderName = "Orbit " + orbitName;
         let newFolder = gui.addFolder(folderName);
         let newOrbitState: OrbitState = {
-            a: Math.random() * 9 + 1,
-            e: Math.random() * (1 - 1e-7),
-            i: Math.random() * 360,
-            O: Math.random() * 360,
-            o: Math.random() * 360,
-            theta: 0.0,
+            a: Math.random() * 9 + 1,       // semi-major axis (units)
+            e: Math.random() * (1 - 1e-7),  // eccentricity (scalar)
+            i: Math.random() * 360,         // inclination (radians)
+            O: Math.random() * 360,         // RAAN (radians)
+            o: Math.random() * 360,         // AoP (radians)
+            theta: 0.0,                     // True anomaly (radians)
             showGuides: true,
             showOrbitalPlane: true,
             remove: function () {
@@ -142,7 +136,6 @@ const state = {
                 scene.children.splice(orbitIndex, 1);
                 newFolder.destroy();
                 render();
-                // console.log('state.orbits.length', state.orbits.length);
             }
         };
         state.orbitStates.push(newOrbitState);
@@ -213,7 +206,6 @@ const state = {
             ellipse.translateX(-f);
             render();
         });
-        // state.orbits.push(newOrbit);
         newFolder.add(newOrbitState, 'showGuides').name('Show guides').onChange((e: boolean) => {
             ((newOrbit.getObjectByName('periapsisAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
             ((newOrbit.getObjectByName('yawAngle') as THREE.LineLoop).material as THREE.Material).visible = e;
@@ -227,19 +219,9 @@ const state = {
         newFolder.add(newOrbitState, 'remove').name("Remove");
         scene.add(newOrbit);
         render();
-        // console.log('state.orbits.length', state.orbits.length)
     },
     orbitStates: [] as OrbitState[],
     orbits: [] as THREE.Object3D[],
-    // pos_x: 0.0,
-    // pos_y: 0.0,
-    // pos_z: 0.0,
-    // vel_x: 0.0,
-    // vel_y: 0.0,
-    // vel_z: 0.0,
-    // v: 0.0,
-    // arg_x: 0.0,
-    // arg_y: 0.0,
 };
 
 const planetNames: { [key: string]: string } = {
@@ -257,12 +239,7 @@ gui.add(state, 'showEcliptic').name('Show plane').onChange((e: boolean) => {
     ecliptic.visible = e;
     render();
 })
-// const kepler = gui.addFolder('Keplerian elements');
-// kepler.add(state, 'a').min(0).step(0.1).onChange(render);
-// kepler.add(state, 'e', 0, 1-1e-7).onChange(render);
-// kepler.add(state, 'i', 0, 360).onChange(render);
-// kepler.add(state, 'O', 0, 360).onChange(render).name("\u03A9");
-// kepler.add(state, 'o', 0, 360).onChange(render).name("\u03C9");
+
 const canvas: HTMLCanvasElement = document.querySelector("#canvas") as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas });
 const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
