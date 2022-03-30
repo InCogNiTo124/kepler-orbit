@@ -19,22 +19,25 @@ function radians(degrees: number) {
 function orbitShapeHandler(ellipse: THREE.Mesh, a: number, e: number, o: number) {
     let f = a * e;
     let b = Math.sqrt(a * a - f * f);
-    const path = new THREE.Shape();
-    path.absellipse(0, 0, a, b, 0, 2 * Math.PI, false, 0);
-    const geometry = new THREE.ShapeBufferGeometry(path, ORBIT_POINTS_COUNT);
-    ellipse.geometry = geometry;
+    let curve = new THREE.EllipseCurve(
+        0, 0,
+        a, b,
+        0, 2*Math.PI,
+        false,
+        0);
+    ellipse.geometry.setFromPoints(curve.getPoints(ORBIT_POINTS_COUNT));
     ellipse.position.sub(ellipse.position);
     ellipse.rotation.z = o;
     ellipse.translateX(-f);
 }
 
 interface OrbitState {
-    a: number, // semi-major axis (units)
-    e: number, // eccentricity (scalar)
-    i: number, // inclination (radians)
-    O: number, // RAAN (radians)
-    o: number, // AoP (radians)
-    theta: number, // True anomaly (radians)}
+    a: number,      // semi-major axis (units)
+    e: number,      // eccentricity (scalar)
+    i: number,      // inclination (radians)
+    O: number,      // RAAN (radians)
+    o: number,      // AoP (radians)
+    theta: number,  // True anomaly (radians)}
     remove: Function,
     showGuides: boolean,
     showOrbitalPlane: boolean
@@ -72,7 +75,7 @@ function createOrbit(orbitState: OrbitState, orbitColor: string): THREE.Object3D
     yaw.rotation.y = radians(orbitState.O);
     const pitch = new THREE.Object3D();
     pitch.name = 'pitch';
-    pitch.rotation.x = -radians(90 - orbitState.i);
+    pitch.rotation.x = radians(orbitState.i-90);
     yaw.add(pitch);
     root.add(yaw);
 
@@ -94,11 +97,17 @@ function createOrbit(orbitState: OrbitState, orbitColor: string): THREE.Object3D
     // ellipse
     let f = orbitState.a * orbitState.e;
     let b = Math.sqrt(orbitState.a * orbitState.a - f * f);
-    const path = new THREE.Shape();
-    path.absellipse(0, 0, orbitState.a, b, 0, 2 * Math.PI, false, 0);
-    const geometry = new THREE.ShapeBufferGeometry(path, ORBIT_POINTS_COUNT);
-    const material = new THREE.MeshBasicMaterial({ color: "#"+orbitColor, side: THREE.DoubleSide });
-    const ellipse = new THREE.Mesh(geometry, material);
+
+    let curve = new THREE.EllipseCurve(
+        0, 0,
+        orbitState.a, b,
+        0, 2*Math.PI,
+        false,
+        0);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setFromPoints(curve.getPoints(ORBIT_POINTS_COUNT));
+    const material = new THREE.LineBasicMaterial({ color: "#"+orbitColor, side: THREE.DoubleSide });
+    const ellipse = new THREE.LineLoop(geometry, material);
     ellipse.name = 'ellipse';
 
     ellipse.position.sub(ellipse.position);
