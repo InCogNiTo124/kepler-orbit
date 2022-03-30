@@ -161,7 +161,7 @@ const state = {
                 0, Math.PI / 2.0 - i,
                 false,
                 0);
-            let points = pitchAngleCurve.getPoints(50);
+            let points = pitchAngleCurve.getPoints(ORBIT_POINTS_COUNT);
             points.push(new THREE.Vector2(0.0, 0.0));
             pitchAngle.geometry.setFromPoints(points);
             pitch.rotation.x = -i;
@@ -179,7 +179,7 @@ const state = {
                 false,
                 0);
             yawAngleCurve.aEndAngle = O;
-            let points = yawAngleCurve.getPoints(50);
+            let points = yawAngleCurve.getPoints(ORBIT_POINTS_COUNT);
             points.push(new THREE.Vector2(0.0, 0.0));
             yawAngle.geometry.setFromPoints(points);
             yaw.rotation.y = O;
@@ -196,7 +196,7 @@ const state = {
                 0, o,
                 false,
                 0);
-            let points = periapsisAngleCurve.getPoints(50);
+            let points = periapsisAngleCurve.getPoints(ORBIT_POINTS_COUNT);
             points.push(new THREE.Vector2(0.0, 0.0));
             periapsisAngle.geometry.setFromPoints(points);
 
