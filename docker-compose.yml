@@ -14,7 +14,12 @@ services:
       - "traefik.http.routers.orbit.tls=true"
       - "traefik.http.routers.orbit.tls.certresolver=le"
       - "traefik.http.services.orbit.loadbalancer.server.scheme=http"
-      - "traefik.http.services.orbit.loadbalancer.server.port=80"
+      - "traefik.http.services.orbit.loadbalancer.server.port=6090"
       - "traefik.docker.network=traefik_default"
-    ports:
-      - "6090:3000"
+    expose:
+      - "6090"
+    command:
+      - "serve"
+      - "dist"
+      - "-p"
+      - "6090"

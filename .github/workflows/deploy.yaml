@@ -1,0 +1,23 @@
+name: deploy on production
+on:
+  # Deploy only when pushed directly to the master
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: ssh to my production server and do manual deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd  ${{ github.event.repository.name }} &&
+            git checkout -f master &&
+            git pull -f &&
+            make
