@@ -23,3 +23,9 @@ services:
       - "dist"
       - "-p"
       - "6090"
+    networks:
+      - traefik_default
+
+networks:
+  traefik_default:
+    external: true

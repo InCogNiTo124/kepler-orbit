@@ -4,4 +4,4 @@ WORKDIR /orbit
 COPY . .
 RUN yarn install
 RUN yarn build
-CMD ["serve", "dist"]
+EXPOSE 6090
