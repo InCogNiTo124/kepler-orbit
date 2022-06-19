@@ -8,16 +8,9 @@ jobs:
   deploy:
     name: deploy
     runs-on: ubuntu-latest
+    environment: MAIN_ENV
     steps:
-      - name: ssh to my production server and do manual deploy
-        uses: appleboy/ssh-action@master
+      - name: Scaling lamp
+        uses: InCogNiTo124/scaling-lamp@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd  ${{ github.event.repository.name }} &&
-            git fetch &&
-            git checkout -f origin/master &&
-            make
+          vault-password: ${{ secrets.VAULT_PASSWORD }}
