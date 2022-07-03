@@ -131,7 +131,7 @@ const state = {
         let newOrbitState: OrbitState = {
             a: Math.random() * 9 + 1,       // semi-major axis (units)
             e: Math.random() * (1 - 1e-7),  // eccentricity (scalar)
-            i: Math.random() * 360,         // inclination (radians)
+            i: Math.random() * 180,         // inclination (radians)
             O: Math.random() * 360,         // RAAN (radians)
             o: Math.random() * 360,         // AoP (radians)
             theta: 0.0,                     // True anomaly (radians)
@@ -159,7 +159,7 @@ const state = {
             orbitShapeHandler(ellipse, newOrbitState.a, newOrbitState.e, radians(newOrbitState.o));
             render();
         });
-        newFolder.add(newOrbitState, 'i', 0, 360).onChange((e: number) => {
+        newFolder.add(newOrbitState, 'i', 0, 180).onChange((e: number) => {
             let pitchAngle = newOrbit.getObjectByName('pitchAngle') as THREE.LineLoop;
             let pitch = newOrbit.getObjectByName('pitch') as THREE.Object3D;
             const i = radians(90 - e);
