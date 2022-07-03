@@ -18,11 +18,6 @@ services:
       - "traefik.docker.network=traefik_default"
     expose:
       - "6090"
-    command:
-      - "serve"
-      - "dist"
-      - "-p"
-      - "6090"
     networks:
       - traefik_default
 
