@@ -1,10 +1,10 @@
-FROM node:18.4.0-alpine3.15 AS build-stage
+FROM node:18.8.0-alpine3.15 AS build-stage
 WORKDIR /orbit
 ADD . .
 RUN yarn install
 RUN yarn build
 
-FROM node:18.4.0-alpine3.15 as prod-stage
+FROM node:18.8.0-alpine3.15 as prod-stage
 RUN yarn global add serve
 COPY package.json yarn.lock .
 RUN yarn install --prod
