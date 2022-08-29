@@ -12,7 +12,7 @@
     "vite": "3.0.9"
   },
   "dependencies": {
-    "@types/three": "0.143.1",
+    "@types/three": "0.143.2",
     "lil-gui": "0.17.0",
     "three": "0.143.0"
   }
