@@ -1,0 +1,19 @@
+services:
+  orbit:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.orbit.rule=Host(`orbit.msmetko.xyz`)"
+      - "traefik.http.routers.orbit.entrypoints=websecure"
+      - "traefik.http.routers.orbit.tls=true"
+      - "traefik.http.routers.orbit.tls.certresolver=le"
+      - "traefik.http.services.orbit.loadbalancer.server.scheme=http"
+      - "traefik.http.services.orbit.loadbalancer.server.port=6090"
+      - "traefik.docker.network=traefik_default"
+    expose:
+      - "6090"
+    networks:
+      - traefik_default
+
+networks:
+  traefik_default:
+    external: true
