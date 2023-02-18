@@ -1,9 +1,5 @@
 version: '3'
 services:
   orbit:
-    image: orbit
     container_name: orbit
-    build:
-      dockerfile: Dockerfile
-      context: .
     restart: always

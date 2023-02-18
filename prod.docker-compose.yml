@@ -1,5 +1,6 @@
 services:
   orbit:
+    image: ghcr.io/incognito124/kepler-orbit:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.orbit.rule=Host(`orbit.msmetko.xyz`)"
@@ -17,3 +18,4 @@ services:
 networks:
   traefik_default:
     external: true
+    name: traefik_default
