@@ -4,6 +4,7 @@ import earthMap from '../textures/2k_earth_daymap.jpg';
 import moonMap from '../textures/2k_moon.jpg';
 import saturnMap from '../textures/2k_saturn.jpg';
 import saturnRingMap from '../textures/2k_saturn_ring_alpha.png';
+import { BufferAttribute } from 'three';
 
 interface Planet {
     readonly map: string,
@@ -40,15 +41,17 @@ for (const key in PLANET_TEMPLATES) {
         map: loader.load(planet.map)
     });
     let planetMesh = new THREE.Mesh(sphereGeometry, material);
+
+    // TODO refactor this, it feels hacky
     if (planet.ring !== undefined) {
         let ringsGeometry = new THREE.RingGeometry(planet.ring.startRadius, planet.ring.endRadius, 128, 1);
         let t = (planet.ring.startRadius + planet.ring.endRadius) / 2;
         // https://discourse.threejs.org/t/applying-a-texture-to-a-ringgeometry/9990/3
-        var pos = ringsGeometry.attributes.position;
+        var pos = ringsGeometry.attributes.position as BufferAttribute;
         var v3 = new THREE.Vector3();
         for (let i = 0; i < pos.count; i++){
             v3.fromBufferAttribute(pos, i);
-            ringsGeometry.attributes.uv.setXY(i, v3.length() < t? 0 : 1, 1);
+            (ringsGeometry.attributes.uv as BufferAttribute).setXY(i, v3.length() < t? 0 : 1, 1);
         }
         var ringsMaterial = new THREE.MeshBasicMaterial({map: loader.load(planet.ring.map), side: THREE.DoubleSide, transparent: true});
         var ringMesh = new THREE.Mesh(ringsGeometry, ringsMaterial)
