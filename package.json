@@ -9,10 +9,10 @@
   },
   "devDependencies": {
     "typescript": "5.0.4",
-    "vite": "4.3.8"
+    "vite": "4.3.9"
   },
   "dependencies": {
-    "@types/three": "0.152.0",
+    "@types/three": "0.152.1",
     "lil-gui": "0.18.1",
     "three": "0.152.2"
   }
