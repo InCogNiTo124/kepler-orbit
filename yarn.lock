@@ -176,10 +176,10 @@ fsevents@~2.3.2:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
   integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
-lil-gui@0.18.1:
-  version "0.18.1"
-  resolved "https://registry.yarnpkg.com/lil-gui/-/lil-gui-0.18.1.tgz#879035a72400d458ef4ec41e0f7ca4fd690875b2"
-  integrity sha512-nsDJLflFGro81hcGqaiDNBEKgkMKNF9okmMmW3Xc6sPXP1zyfD3oIftyctvBQD2iTIUgWDw6CuME1IQZD+OvLw==
+lil-gui@0.18.2:
+  version "0.18.2"
+  resolved "https://registry.yarnpkg.com/lil-gui/-/lil-gui-0.18.2.tgz#e28a627be6a38bb80e9237817ad2c530eeb76279"
+  integrity sha512-DgdrLy3/KGC0PiQLKgOcJMPItP4xY4iWgJ9+91Zaxfr8GCTmMps05QS9w9jW7yspILlbscbquwjOwxmWnSx5Uw==
 
 lil-gui@~0.17.0:
   version "0.17.0"
