@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "typescript": "5.1.6",
-    "vite": "4.4.8"
+    "vite": "4.4.9"
   },
   "dependencies": {
     "@types/three": "0.155.0",
