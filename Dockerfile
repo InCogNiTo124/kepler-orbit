@@ -4,9 +4,9 @@ ADD . .
 RUN yarn install
 RUN yarn build
 
-FROM node:20.13.1-alpine3.18 as prod-stage
+FROM node:20.13.1-alpine3.18 AS prod-stage
 RUN yarn global add serve
-COPY package.json yarn.lock .
+COPY package.json yarn.lock ./
 RUN yarn install --prod
 COPY --from=build-stage /orbit/dist /dist
 EXPOSE 6090
